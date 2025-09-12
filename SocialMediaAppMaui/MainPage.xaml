@@ -1,0 +1,223 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:tabView="clr-namespace:Syncfusion.Maui.Toolkit.TabView;assembly=Syncfusion.Maui.Toolkit"
+             xmlns:listView="clr-namespace:Syncfusion.Maui.ListView;assembly=Syncfusion.Maui.ListView"
+             xmlns:core="clr-namespace:Syncfusion.Maui.Core;assembly=Syncfusion.Maui.Core"
+             xmlns:buttons="clr-namespace:Syncfusion.Maui.Toolkit.Buttons;assembly=Syncfusion.Maui.Toolkit"
+             xmlns:local="clr-namespace:SocialMediaAppMaui"
+             x:Class="SocialMediaAppMaui.MainPage">
+
+    <ContentPage.Resources>
+        <Style TargetType="tabView:SfTabItem">
+            <Setter Property="VisualStateManager.VisualStateGroups">
+                <VisualStateGroupList>
+                    <VisualStateGroup>
+                        <VisualState x:Name="Normal" >
+                            <VisualState.Setters>
+                                <Setter Property="TextColor" Value="#000000" />
+                            </VisualState.Setters>
+                        </VisualState>
+                        <VisualState x:Name="Selected">
+                            <VisualState.Setters>
+                                <Setter Property="TextColor" Value="#6750a4" />
+                            </VisualState.Setters>
+                        </VisualState>
+                    </VisualStateGroup>
+                </VisualStateGroupList>
+            </Setter>
+        </Style>
+
+        <ResourceDictionary>
+            <local:LikesToIconConverter x:Key="likesToIconConverter"/>
+            <local:LikesToColorConverter x:Key="likesToColorConverter"/>
+            
+            <Color x:Key="SfListViewItemRippleBackground">Transparent</Color>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+    <ContentPage.BindingContext>
+        <local:SocialMediaViewModel />
+    </ContentPage.BindingContext>
+
+    <tabView:SfTabView EnableSwiping="True" IsCenterButtonEnabled="True" IndicatorStrokeThickness="0" TabBarPlacement="Bottom"
+                       CenterButtonTapped="OnCenterbuttonTapped">
+
+        <!--Center Button-->
+        <tabView:SfTabView.CenterButtonSettings>
+            <tabView:CenterButtonSettings DisplayMode="Image"  ImageSize="35">
+                <tabView:CenterButtonSettings.ImageSource>
+                    <FontImageSource Glyph="&#xe71b;" Color="Black" FontFamily="MauiSampleFontIcon" Size="20"/>
+                </tabView:CenterButtonSettings.ImageSource>
+            </tabView:CenterButtonSettings>
+        </tabView:SfTabView.CenterButtonSettings>
+
+        <!--Home Tab-->
+        <tabView:SfTabItem x:Name="homeTab" ImageSize="30">
+            <tabView:SfTabItem.ImageSource>
+                <FontImageSource Glyph="&#xe738;"
+                                 Color="{Binding Source={x:Reference homeTab},Path=TextColor}"
+                                 FontFamily="MauiSampleFontIcon"/>
+            </tabView:SfTabItem.ImageSource>
+            <listView:SfListView ItemsSource="{Binding Posts}" SelectionMode="None"
+                                 AutoFitMode="Height">
+                <listView:SfListView.ItemTemplate>
+                    <DataTemplate>
+                        <VerticalStackLayout Padding="10">
+                            <HorizontalStackLayout>
+                                <Image Source="{Binding ProfileImage}" WidthRequest="40" HeightRequest="40" Aspect="AspectFill"/>
+                                <Label Text="{Binding UserName}" FontSize="16" VerticalOptions="Center" Padding="5"/>
+                            </HorizontalStackLayout>
+                            <Image Source="{Binding PostImage}" WidthRequest="300" HeightRequest="200" Aspect="AspectFill"/>
+                            <Label Text="{Binding Caption}" FontSize="14" Padding="5"/>
+
+                            <!-- Post Interactions -->
+                            <HorizontalStackLayout Spacing="10">
+                                <!-- Like Button -->
+                                <HorizontalStackLayout>
+                                    <Label Text="{Binding IsLiked, Converter={StaticResource likesToIconConverter}}"
+                                           TextColor="{Binding IsLiked, Converter={StaticResource likesToColorConverter}}"
+                                           FontFamily="MauiSampleFontIcon" FontSize="24" VerticalOptions="Center">
+                                        <Label.GestureRecognizers>
+                                            <TapGestureRecognizer Tapped="OnLikeTapped"/>
+                                        </Label.GestureRecognizers>
+                                    </Label>
+                                    <Label Text="{Binding Likes, Mode=TwoWay}" VerticalOptions="Center" FontSize="14" Padding="5"/>
+                                </HorizontalStackLayout>
+
+                                <!-- Comment Button -->
+                                <HorizontalStackLayout>
+                                    <Label Text="&#xE75A;" FontFamily="MauiSampleFontIcon" FontSize="24" HorizontalOptions="Center">
+                                        <Label.GestureRecognizers>
+                                            <TapGestureRecognizer Tapped="OnCommentsTapped"/>
+                                        </Label.GestureRecognizers>
+                                    </Label>
+                                    <Label Text="{Binding Comments}" VerticalOptions="Center" FontSize="14" Padding="5"/>
+                                </HorizontalStackLayout>
+
+                                <!-- Share Button -->
+                                <HorizontalStackLayout>
+                                    <Label Text="&#xE770;" FontFamily="MauiSampleFontIcon" FontSize="24" HorizontalOptions="Center">
+                                        <Label.GestureRecognizers>
+                                            <TapGestureRecognizer Tapped="OnSharedTapped"/>
+                                        </Label.GestureRecognizers>
+                                    </Label>
+                                    <Label Text="{Binding Shares}" FontSize="14" Padding="5"/>
+                                </HorizontalStackLayout>
+                            </HorizontalStackLayout>
+                        </VerticalStackLayout>
+                    </DataTemplate>
+                </listView:SfListView.ItemTemplate>
+            </listView:SfListView>
+        </tabView:SfTabItem>
+
+        <!--Messages Tab-->
+        <tabView:SfTabItem x:Name="messageTab" ImageSize="30" >
+            <tabView:SfTabItem.ImageSource>
+                <FontImageSource Glyph="&#xe75a;" 
+                                 Color="{Binding Source={x:Reference messageTab},Path=TextColor}"
+                                 FontFamily="MauiSampleFontIcon"/>
+            </tabView:SfTabItem.ImageSource>
+
+            <Grid RowSpacing="10">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <SearchBar x:Name="filterSenderText" HeightRequest="40"
+                           Placeholder="Search here to filter" TextChanged="OnSenderTextChanged"/>
+
+                <listView:SfListView Grid.Row="1" x:Name="messagesListView" ItemsSource="{Binding Messages}" SelectionMode="None">
+                    <listView:SfListView.ItemTemplate>
+                        <DataTemplate>
+                            <core:SfBadgeView BadgeText="{Binding UnreadMessageCount}">
+                                <core:SfBadgeView.BadgeSettings>
+                                    <core:BadgeSettings BadgeAlignment="End" Position="Right" IsVisible="{Binding IsUnread}" />
+                                </core:SfBadgeView.BadgeSettings>
+                                <HorizontalStackLayout Padding="10">
+                                    <Image Source="{Binding SenderImage}" WidthRequest="40" HeightRequest="40"/>
+                                    <Label Text="{Binding Sender}" Padding="5" VerticalOptions="Center" FontSize="16"/>
+                                </HorizontalStackLayout>
+                            </core:SfBadgeView>
+                        </DataTemplate>
+                    </listView:SfListView.ItemTemplate>
+                </listView:SfListView>
+
+            </Grid>
+        </tabView:SfTabItem>
+
+        <!--Explore Tab-->
+        <tabView:SfTabItem x:Name="exploreTab" ImageSize="30">
+            <tabView:SfTabItem.ImageSource>
+                <FontImageSource Glyph="&#xe728;" 
+                                 Color="{Binding Source={x:Reference exploreTab},Path=TextColor}"
+                                 FontFamily="MauiSampleFontIcon"/>
+            </tabView:SfTabItem.ImageSource>
+
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <SearchBar x:Name="filterText" HeightRequest="40"
+                           Placeholder="Search here to filter"
+                           TextChanged="OnFilterTextChanged"/>
+
+                <listView:SfListView x:Name="explorePostsListView" Grid.Row="1"
+                                     ItemsSource="{Binding ExplorePosts}" SelectionMode="None" AutoFitMode="Height">
+                    <listView:SfListView.ItemsLayout>
+                        <listView:GridLayout SpanCount="3"/>
+                    </listView:SfListView.ItemsLayout>
+                    <listView:SfListView.ItemTemplate>
+                        <DataTemplate>
+                            <Image Source="{Binding PostImage}" Aspect="AspectFill" Margin="5"/>
+                        </DataTemplate>
+                    </listView:SfListView.ItemTemplate>
+                </listView:SfListView>
+
+            </Grid>
+        </tabView:SfTabItem>
+
+        <!--Profile Tab-->
+        <tabView:SfTabItem x:Name="profileTab" ImageSize="30">
+            <tabView:SfTabItem.ImageSource>
+                <FontImageSource Glyph="&#xe760;" 
+                                 Color="{Binding Source={x:Reference profileTab},Path=TextColor}"
+                                 FontFamily="MauiSampleFontIcon"/>
+            </tabView:SfTabItem.ImageSource>
+            <ScrollView>
+                <VerticalStackLayout Padding="10" Spacing="10">
+                    <Border HeightRequest="100" WidthRequest="100">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="50" />
+                        </Border.StrokeShape>
+                        <Image x:Name="profileImage" Source="{Binding Profile.ProfileImage}" Aspect="AspectFill" HorizontalOptions="Center"/>
+                    </Border>
+                    <Label Text="{Binding Profile.Name}" FontSize="20" FontAttributes="Bold" HorizontalOptions="Center"/>
+                    <Label Text="{Binding Profile.Bio}" FontSize="14" HorizontalOptions="Center" TextColor="Gray"/>
+                    <HorizontalStackLayout HorizontalOptions="Center">
+                        <Label Text="{Binding Profile.Followers, StringFormat='{0} Followers'}" FontSize="14" Padding="5"/>
+                        <Label Text="{Binding Profile.Following, StringFormat='{0} Following'}" FontSize="14" Padding="5"/>
+                    </HorizontalStackLayout>
+                    <buttons:SfButton Text="Edit Profile" Clicked="OnEditProfileClicked" BackgroundColor="Blue" TextColor="White" HorizontalOptions="Center"/>
+                    <Label Text="User Posts" FontSize="18" FontAttributes="Bold"/>
+
+                    <listView:SfListView ItemsSource="{Binding Profile.UserPosts}" AutoFitMode="Height" SelectionMode="None">
+                        <listView:SfListView.ItemsLayout>
+                            <listView:GridLayout SpanCount="2" />
+                        </listView:SfListView.ItemsLayout>
+                        <listView:SfListView.ItemTemplate>
+                            <DataTemplate>
+                                <VerticalStackLayout Padding="5">
+                                    <Image Source="{Binding PostImage}" HeightRequest="100" Aspect="AspectFill"/>
+                                </VerticalStackLayout>
+                            </DataTemplate>
+                        </listView:SfListView.ItemTemplate>
+                    </listView:SfListView>
+                </VerticalStackLayout>
+            </ScrollView>
+        </tabView:SfTabItem>
+
+    </tabView:SfTabView>
+
+</ContentPage>
